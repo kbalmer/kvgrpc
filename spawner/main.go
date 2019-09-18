@@ -21,9 +21,9 @@ func main() {
 	flag.Parse()
 
 	buildCmd := exec.Command("go", "build")
-	buildCmd.Dir = "../server"
+	buildCmd.Dir = "../node"
 	if err := buildCmd.Run(); err != nil {
-		fmt.Printf("failed to build server binary: %s", err)
+		fmt.Printf("failed to build node binary: %s", err)
 		return
 	}
 
@@ -41,9 +41,9 @@ func main() {
 			args = append(args, fmt.Sprintf("-portList=%d", j))
 		}
 
-		cmd := exec.Command("./server", args...)
+		cmd := exec.Command("./node", args...)
 
-		cmd.Dir = "../server"
+		cmd.Dir = "../node"
 		wg.Add(1)
 		go executer(&wg, cmd)
 	}
