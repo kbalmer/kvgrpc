@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package kv;
+
+service KV {
+    // Get method
+    rpc Get (Request) returns (ValueReturn);
+    // Post method
+    rpc Post (PostRequest) returns (Empty);
+    // Delete method
+    rpc Delete (Request) returns (Empty);
+    // List method
+    rpc List (Empty) returns (stream ValueReturn);
+    // Health method
+    rpc Health (Empty) returns (Empty);
+}
+
+message Empty {}
+
+message Request {
+    string key = 1;
+    bool external = 2;
+    int64 timestamp = 3;
+}
+
+message ValueReturn {
+    bytes value = 1;
+}
+
+message PostRequest {
+    string key = 1;
+    bytes value = 2;
+    bool external = 3;
+    int64 timestamp = 4;
+}
