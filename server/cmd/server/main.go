@@ -29,14 +29,17 @@ func (i *portCollection) Set(value string) error {
 func main() {
 	var portList portCollection
 	var livePort string
+	var eg errgroup.Group
 
 	flag.StringVar(&livePort, "livePort", "7000", "the port which the node lives on")
 	flag.Var(&portList, "portList", "list of ports to be consumed by the node")
 	flag.Parse()
 
+	// this creates a blank node with only the port it lives on and the other ports in the network initiated
 	blankNode := node.NewNode(livePort, portList)
 
-	var eg errgroup.Group
+	// an error group is used here to catch the first error from either listening and serving or from fetching the other
+	// client connections to other nodes in the network
 	eg.Go(func() error {
 		if err := blankNode.Start(livePort); err != nil {
 			return fmt.Errorf("failed to start node on port %s: %s", livePort, err)

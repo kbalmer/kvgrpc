@@ -29,8 +29,9 @@ func main() {
 
 	var wg sync.WaitGroup
 
+	// this loop ranges over the desired port range and creates a command to be executed which will spawn a node
+	// on each port
 	for i := startingPort; i < startingPort+nodeCount; i++ {
-
 		var args []string
 		args = append(args, fmt.Sprintf("-livePort=%d", i))
 
@@ -42,16 +43,17 @@ func main() {
 		}
 
 		cmd := exec.Command("./server", args...)
-
 		cmd.Dir = "../server"
 		wg.Add(1)
-		go executer(&wg, cmd)
+		go executor(&wg, cmd)
 	}
-	wg.Wait()
 
+	wg.Wait()
 }
 
-func executer(wg *sync.WaitGroup, cmd *exec.Cmd) {
+// executor runs the given cmd and uses WaitGroup for safety, the stdout and stderr from the cmd is set to the stdout
+// and stderr of this binary as to pipe up any outputs or errors that come from a node
+func executor(wg *sync.WaitGroup, cmd *exec.Cmd) {
 	defer wg.Done()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr

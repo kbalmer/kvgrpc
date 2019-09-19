@@ -43,7 +43,7 @@ func (s *node) Post(ctx context.Context, request *pb.PostRequest) (*pb.Empty, er
 		for _, node := range s.network {
 			_, err := node.kvClient.Post(ctx, &pb.PostRequest{Key: request.Key, Value: []byte(request.Value), External: false, Timestamp: request.Timestamp})
 			if err != nil {
-				return nil, fmt.Errorf("failed to post/put to store with key %s and value %s: %s", request.Key, request.Value, err)
+				return nil, fmt.Errorf("failed to post/put to store with key %s and value %s: %s\n", request.Key, request.Value, err)
 			}
 		}
 	}
@@ -71,7 +71,7 @@ func (s *node) Delete(ctx context.Context, request *pb.Request) (*pb.Empty, erro
 		for _, node := range s.network {
 			_, err := node.kvClient.Delete(ctx, &pb.Request{Key: request.Key, External: false, Timestamp: request.Timestamp})
 			if err != nil {
-				return nil, fmt.Errorf("failed to delete value associated to key %s from store: %s", request.Key, err)
+				return nil, fmt.Errorf("failed to delete value associated to key %s from store: %s\n", request.Key, err)
 			}
 		}
 	}

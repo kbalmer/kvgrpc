@@ -35,6 +35,7 @@ func NewNode(livePort string, portList []string) *node {
 			lastAction: time.Now().UnixNano(),
 			livePort: livePort,
 			portList: portList,
+			network: make([]nodeConnections, len(portList)),
 	}
 }
 
@@ -59,8 +60,6 @@ func (s *node) Start(livePort string) error {
 // FetchConnections communicates from the node spawned by this file to other nodes in the portList, it first confirms
 // a connection can be made. Once successful it then populates the network with grpc.ClientConns and KVClients.
 func (s *node) FetchConnections() error {
-	s.network = make([]nodeConnections, len(s.portList))
-
 	for i, port := range s.portList {
 		// dial the port to set create the client from this node (on 'livePort') to another node (on 'port')
 		newConn, err := grpc.Dial("localhost:"+port, grpc.WithInsecure())
@@ -68,9 +67,8 @@ func (s *node) FetchConnections() error {
 			return fmt.Errorf("failed to dial node %s from %s: %s", port, s.livePort, err)
 		}
 
-		// attempt 3 times to hit the Health endpoint of the KVClient on the node living on 'port', a 500ms sleep is allowed
-		// between attempts, this should be sufficient to allow all nodes to start up and all connections in the network
-		// to resolve
+		// attempt to hit the Health endpoint of the KVClient on the node living on 'port', a total of 20 seconds with 100
+		// attempts is deemed sufficient in order for all ports and nodes to be listening and serving
 		for j := 0; j < 100; j++ {
 			if _, err = pb.NewKVClient(newConn).Health(context.Background(), &pb.Empty{}); err != nil {
 				time.Sleep(time.Millisecond * 200)
